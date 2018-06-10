@@ -1,0 +1,1 @@
+module.exports.SEED='este-token-es-dificil#';
