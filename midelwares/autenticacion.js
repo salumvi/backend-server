@@ -16,7 +16,7 @@ exports.verificaToken =function (req, res,next){
     jwt.verify(token, SEED, (err, decoded) => {
         if (err) {
             return res.status(401).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'Token no válido, No autorizado',
                 errors: err
             });
@@ -25,10 +25,20 @@ exports.verificaToken =function (req, res,next){
         req.usuario=decoded.usuario;
         next();
 
-        // res.status(200).json({
-        //     ok: true,
-        //     decoded: decoded
-        // });
-
     });
+};
+
+
+// Verificar ADIMN_ROLE
+
+exports.soloAdminRol = function( req,res,next){
+
+    if(req.usuario.role!='ADMIN_ROLE'){
+        return res.status(401).json({
+            hasError: true,
+            error: 'Acceso no autorizado, su role no puede crear Hospitales'
+            
+        });
+    }
+    next();
 }

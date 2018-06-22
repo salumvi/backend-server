@@ -21,14 +21,14 @@ app.post('/', (req, res) => {
 
         if (err) {
             return res.status(500).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'Error al buscar usuario',
                 errors: err
             });
         }
         if (!ususrioDB) {
             return res.status(400).json({
-                ok: false,
+                hasError: true,               
                 mensaje: 'Credenciales incorrectas',
                 errors: {
                     mensaje: 'El correo es incorrecto'
@@ -37,7 +37,7 @@ app.post('/', (req, res) => {
         }
         if (!bcrypt.compareSync(body.password, ususrioDB.password)) {
             return res.status(400).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'Credenciales incorrectas',
                 errors: {
                     mensaje: 'El password es incorrecto'
@@ -50,7 +50,7 @@ var token =jwt.sign({usuario: ususrioDB}, SEED ,{expiresIn:14400}); // 4 horas
 
 
         res.status(200).json({
-            ok: true,
+            hasError: false,
             ususrio: ususrioDB,
             token:token,
             id: ususrioDB._id

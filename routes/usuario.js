@@ -13,12 +13,17 @@ var Usuario=require('../models/usuario');
 // GET obtener usuarios, 
 app.get('/', (req, res, next) => {
 
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Usuario.find({}, 'nombre email img role')
+        .skip(desde)
+        .limit(5)
         .exec((err, usuarios ) => {
 
             if (err) {
                 return res.status(500).json({
-                    ok: false,
+                    hasError: true,
                     mensaje: 'Error cargando Usuarios',
                     errors: err
                 });
@@ -26,13 +31,45 @@ app.get('/', (req, res, next) => {
 
             if (usuarios.length === 0) {
                 return res.status(200).json({
-                    ok: true,
+                    hasError: true,
                     mensaje: 'No hay usuarios'
                 });
             }
+
+            Usuario.count({},(err,n_registros)=>{
+                res.status(200).json({
+                    hasError: false,
+                    usuarios: usuarios,
+                    total: n_registros
+                });
+            });
+        });
+});
+
+// GET obtener un usuario, 
+app.get('/:id', (req, res, next) => {
+    var id = req.params.id;
+
+    Usuario.findById(id, 'nombre email img role',
+        (err, usuario ) => {
+
+            if (err) {
+                return res.status(500).json({
+                    hasError: true,
+                    mensaje: 'Error busqueda de usuario',
+                    errors: err
+                });
+            }
+
+            if (usuario.length === 0) {
+                return res.status(404).json({
+                    hasError: true,
+                    mensaje: 'Este Id no pertenece a ningún usuario'
+                });
+            }
             res.status(200).json({
-                ok: true,
-                usuarios: usuarios
+                hasError: false,
+                usuario: usuario
             });
         });
 });
@@ -49,14 +86,14 @@ app.put('/:id',mdAutenticacion.verificaToken , (req, res) => {
 
         if (err) {
             return res.status(500).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'Error al buscar el usuario',
                 errors: err
             });
         }
         if (!usuario) {
             return res.status(400).json({
-                ok: false,
+                hasError: false,
                 mensaje: 'El usuario con el id: ' + id + ' no existe.',
                 errors: {
                     messaje: 'No existe un usuario con ese ID'
@@ -74,14 +111,14 @@ app.put('/:id',mdAutenticacion.verificaToken , (req, res) => {
         usuario.save((err, usuarioGuardado) => {
             if (err) {
                 return res.status(400).json({
-                    ok: false,
+                    hasError: true,
                     mensaje: 'Error al actualizar el usuario',
                     errors: err
                 });
             }
             if (!usuario) {
                 return res.status(400).json({
-                    ok: false,
+                    hasError: true,
                     mensaje: 'El usuario con el id: ' + id + ' no existe.',
                     errors: {messaje: 'No existe un usuario con ese ID'}
                 });
@@ -89,7 +126,7 @@ app.put('/:id',mdAutenticacion.verificaToken , (req, res) => {
             // para no enviar el password aunque esté encriptado
             usuarioGuardado.password = ':)'; 
             res.status(200).json({
-                ok: true,
+                hasError: false,
                 usuario: usuarioGuardado
             });
         });
@@ -119,14 +156,14 @@ app.post('/',mdAutenticacion.verificaToken ,(req, res) => {
 
         if (err) {
             return res.status(400).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'Error al crear usuario',
                 errors: err
             });
         }
 
         res.status(201).json({
-            ok: true,
+            hasError: false,
             usuario: usuarioGuardado,
             usuarioToken:req.usuario
         });
@@ -145,21 +182,21 @@ app.delete('/:id',mdAutenticacion.verificaToken , (req , res)=>{
 
         if (err) {
             return res.status(500).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'Error al Borrar el usuario',
                 errors: err
             });
         }
         if (!usuarioBorrado) {
             return res.status(400).json({
-                ok: false,
+                hasError: true,
                 mensaje: 'El usuario con el id: ' + id + ' no existe.',
                 errors: {messaje: 'No existe un usuario con ese ID'}
             });
         }
         // si regresa un usuario es que se ha borrado, si no regresa ningún usuario es que no había ninguno
             return res.status(200).json({
-                ok: true,
+                hasError: false,
                 usuario:usuarioBorrado
             });
     });
