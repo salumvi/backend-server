@@ -27,5 +27,4 @@ if(fs.existsSync(pathImagen)){
 
 
 
-
 module.exports = app;

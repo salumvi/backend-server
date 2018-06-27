@@ -9,6 +9,7 @@ app.use(fileUpload());
 var Usuario = require('../models/usuario');
 var Medico = require('../models/medico');
 var Hospital = require('../models/hospital');
+var extensionesValidas = require('../config/config').EXTENSIONES_VALIDAS;
 
 app.put('/:tipo/:id', (req, res, next) => {
 
@@ -43,7 +44,7 @@ app.put('/:tipo/:id', (req, res, next) => {
     var extension = nombreCortado[nombreCortado.length - 1];
 
     // Extensiones validas
-    var extensionesValidas = ['png', 'jpg', 'jpeg', 'gif'];
+    //var extensionesValidas = ['png', 'jpg', 'jpeg', 'gif'];
 
 
     if (extensionesValidas.indexOf(extension) < 0) {
